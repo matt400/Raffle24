@@ -1,0 +1,362 @@
+<% include main/header %>
+	<div class="container_">
+		<div class="menu">
+			<div class="logo">Logo</div>
+			<a href="https://steamcommunity.com/tradeoffer/new/?partner=296586100&amp;token=caLhiNhx" class="item" target="_blank">
+				<span class="glyphicon glyphicon-play-circle icon"></span>
+				<span class="item_text">Depozyt</span>
+			</a>
+			<div class="item item_" data-toggle="modal" data-target="#rules">
+				<span class="glyphicon glyphicon-book icon"></span>
+				<div class="item_text">Regulamin</div>
+			</div>
+			<div class="item item_" data-toggle="modal" data-target="#info">
+				<span class="glyphicon glyphicon-question-sign icon"></span>
+				<div class="item_text">Jak to działa?</div>
+			</div>
+			<div class="item item_" data-toggle="modal" data-target="#about">
+				<span class="glyphicon glyphicon-info-sign icon"></span>
+				<div class="item_text">O nas</div>
+			</div>
+			<div class="item item_" data-toggle="modal" data-target="#contact">
+				<span class="glyphicon glyphicon-envelope icon"></span>
+				<div class="item_text">Kontakt</div>
+			</div>
+		</div>
+		<div class="content">
+			<div class="panel_container clearfix">
+				<div class="info_bar">
+					<div class="info_panel">
+						<div class="glyphicon glyphicon-user icon"></div>
+						<span class="value" id="logged_users"><%= total_users %></span>
+						<span class="text" id="logged_text"><%= total_users_text %></span>
+					</div>
+					<div class="info_panel" data-toggle="tooltip" data-placement="bottom" title="Aktualizacja: 01.01.2025">
+						<div class="glyphicon glyphicon-usd icon"></div>
+						<span class="value">5000</span>
+						<span class="text">Największa wygrana</span>
+					</div>
+					<div class="info_panel" data-toggle="tooltip" data-placement="bottom" title="Aktualizacja: 03.01.2025">
+						<div class="glyphicon glyphicon-usd icon"></div>
+						<span class="value">2400</span>
+						<span class="text">Ostatnia wygrana</span>
+					</div>
+					<div class="info_panel">
+						<div class="glyphicon glyphicon-fire icon"></div>
+						<span class="value">5000</span>
+						<span class="text">Dzisiejszych gier</span>
+					</div>
+				</div>
+				<div class="ar_panel">
+					<% if (!user) { %>
+					<div class="button">
+						<a href="/auth/steam"><img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_large_noborder.png" /></a>
+					</div>
+					<% } else { %>
+					<input type="checkbox" id="show_menu" class="show_menu" />
+					<label class="user_menu" for="show_menu">
+						<div class="user clearfix">
+							<div class="avatar">
+								<img src="<%= user._json.avatar %>" />
+							</div>
+							<div class="username">Jesteś zalogowany jako: <div class="name"><%= user.displayName %> <span class="glyphicon glyphicon-circle-arrow-down icon"></span><span class="glyphicon glyphicon-circle-arrow-up icon"></span></div></div>
+						</div>
+						<div class="menu_">
+							<a href="<%= user._json.profileurl %>" class="item" target="_blank"><span class="glyphicon glyphicon-user icon"></span> Twój profil</a>
+							<a href="#" class="item"><span class="glyphicon glyphicon-cog icon"></span> Ustawienia</a>
+							<a href="/logout" class="item"><span class="glyphicon glyphicon-off icon"></span> Wyloguj</a>
+						</div>
+					</label>
+					<% } %>
+				</div>
+			</div>
+			<div class="items col_">
+				<div class="tse-scrollable scroll">
+					<div class="tse-content">
+						<div class="items_">
+							<div class="player clearfix">
+								<div class="info">
+									<span class="name">CHUCK NORRIS</span>
+									<span class="description">postawił skiny o wartości <span class="value">$58.59</span>:</span>
+								</div>
+								<div class="item_list">
+									<div class="item" data-toggle="tooltip" data-placement="right" title="$0.57 - M4A4 | Wyblakła zebra (Ślady używania)">
+										<img src="http://steamcommunity-a.akamaihd.net/economy/image/class/730/520029416/40fx40f" />
+									</div>
+									<div class="item" data-toggle="tooltip" data-placement="right" title="$0.57 - M4A4 | Wyblakła zebra (Ślady używania)">
+										<img src="http://steamcommunity-a.akamaihd.net/economy/image/class/730/520029416/40fx40f" />
+									</div>
+									<div class="item" data-toggle="tooltip" data-placement="right" title="$0.57 - M4A4 | Wyblakła zebra (Ślady używania)">
+										<img src="http://steamcommunity-a.akamaihd.net/economy/image/class/730/520029416/40fx40f" />
+									</div>
+									<div class="item" data-toggle="tooltip" data-placement="right" title="$0.57 - M4A4 | Wyblakła zebra (Ślady używania)">
+										<img src="http://steamcommunity-a.akamaihd.net/economy/image/class/730/520029416/40fx40f" />
+									</div>
+									<div class="item" data-toggle="tooltip" data-placement="right" title="$0.57 - M4A4 | Wyblakła zebra (Ślady używania)">
+										<img src="http://steamcommunity-a.akamaihd.net/economy/image/class/730/520029416/40fx40f" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="bets col_">
+				<div class="circle life">
+					<div class="value">$16,000</div>
+				</div>
+				<div class="information_box">Ze względu na zmiany w systemie wymian Steam, musisz mieć włączony Authenticator komórkowy Steam, przez co najmniej 7 dni!</div>
+			</div>
+			<div class="chat col_">
+				<div class="messages tse-scrollable scroll">
+					<a href="#" class="scroll_down"><span class="glyphicon glyphicon-arrow-down"></a>
+					<div class="tse-content messages_"></div>
+				</div>
+				<div class="new_message">
+					<div class="user_message">aaa</div>
+					<input type="text" class="_input_text message_text" placeholder="Napisz wiadomość...">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="rules" tabindex="-1" role="dialog" aria-labelledby="rules">
+		<div class="modal_dialog" role="document">
+			<div class="modal_content">
+				<div class="modal_header">
+					<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="rules">Regulamin</h4>
+				</div>
+				<div class="modal_body">
+					...
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="info" tabindex="2" role="dialog" aria-labelledby="info">
+		<div class="modal_dialog" role="document">
+			<div class="modal_content">
+				<div class="modal_header">
+					<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="rules">Informacje</h4>
+				</div>
+				<div class="modal_body">
+					...
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="about">
+		<div class="modal_dialog" role="document">
+			<div class="modal_content">
+				<div class="modal_header">
+					<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="rules">O nas</h4>
+				</div>
+				<div class="modal_body">
+					...
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="contact">
+		<div class="modal_dialog" role="document">
+			<div class="modal_content">
+				<div class="modal_header">
+					<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="rules">Kontakt</h4>
+				</div>
+				<div class="modal_body">
+					...
+				</div>
+			</div>
+		</div>
+	</div>
+	<% if(chatMod) { %>
+	<div class="modal fade" id="mod_timeout" tabindex="-1" role="dialog" aria-labelledby="mod_timeout">
+		<div class="mod_dialog" role="document">
+			<div class="mod_content">
+				<div class="modal_header">
+					<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="rules">Timeout dla gracza</h4>
+				</div>
+				<div class="modal_body">
+					<div class="form-horizontal clearfix">
+						<div class="form-group">
+							<label class="col-sm-2 control-label">Nick:</label>
+							<div class="col-sm-10">
+								<p class="form-control-static utt_username">Yii</p>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">Czas:</label>
+							<div class="col-sm-5">
+								<p class="form-control-static">
+									<select class="form-control utt_time">
+										<option value="1">Minuta</option>
+										<option value="2">5 minut</option>
+										<option value="3">10 minut</option>
+										<option value="4">15 minut</option>
+										<option value="5">20 minut</option>
+										<option value="6">30 minut</option>
+										<option value="7">1 godzina</option>
+										<option value="8">2 godziny</option>
+										<option value="9">3 godziny</option>
+										<option value="10">4 godziny</option>
+										<option value="11">6 godzin</option>
+										<option value="12">12 godzin</option>
+									</select>
+								</p>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">Powód:</label>
+							<div class="col-sm-5">
+								<p class="form-control-static">
+									<select class="form-control utt_reason">
+										<option value="1">Obrażanie / wyzywanie</option>
+										<option value="2">Reklama</option>
+										<option value="3">Spam</option>
+									</select>
+								</p>
+							</div>
+						</div>
+						<div class="pull-right clearfix">
+							<button type="submit" class="btn btn-primary" data-mod="timeout_confirm">Potwierdź</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<% } %>
+	<script src="socket.io/socket.io.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/jquery.tse.min.js"></script>
+	<script src="js/jquery.mousewheel.min.js"></script>
+	<script>
+		'use strict';
+
+		$(function () {
+			var socket = io("http://51.254.126.185");
+			var messages = 0;
+			var stop_scrolling = false;
+
+			$('[data-toggle="tooltip"]').tooltip();
+			$(".scroll").TrackpadScrollEmulator();
+
+			function scroll_top() {
+				$(".messages .tse-scroll-content").scrollTop(9999);
+			}
+
+			socket.on('logged_users', function(data) {
+				$("#logged_users").text(data.value);
+				$("#logged_text").text(data.text);
+			});
+
+			socket.on("new_message", function(data) {
+				$(".messages_").append('<div class="message avatar clearfix" style="background-image: url(\'' + data.avatar + '\');" data-uqid="' + data.uqid + '"><span class="author"><a href="' + data.profile_link + '" class="author_link" target="_blank"' + data.colorize_admin +'>' + data.username + '</a><% if(chatMod) { %><div class="mod"><div class="glyphicon glyphicon-remove" data-mod="remove" title="Usuń wiadomość"></div> <div class="glyphicon glyphicon-time" title="Timeout" data-toggle="modal" data-mod="timeout" data-target="#mod_timeout"></div> <div class="glyphicon glyphicon-ban-circle" data-mod="ban" title="Zbanuj gracza"></div></div><% } %></span><span class="text">' + data.msg + '</span></div>');
+				if(messages >= 80) {
+					$('.message:first').remove();
+				}
+				if(!stop_scrolling) {
+					scroll_top();
+				}
+				//$('.messages').TrackpadScrollEmulator("recalculate");
+				messages++;
+			});
+
+			socket.on("remove_message", function(data) {
+				var msg = $(".message[data-uqid='" + data.uqid + "']").find(".text");
+				msg.text(data.msg);
+			});
+
+			socket.on("user_timeout", function(data) {
+				for(var msg in data.dl) {
+					var result = data.dl[msg];
+					$(".message[data-uqid='" + result + "']").remove();
+				}
+				$(".messages_").append('<div class="message sm clearfix"><div>' + data.msg + '</div><div>' + data.reason + '</div></div>');
+				scroll_top();
+			});
+
+			socket.on("user_message", function(data) {
+				$(".user_message").text(data.msg);
+				$(".user_message").fadeIn().delay(5000).fadeOut();
+			});
+
+			socket.on("server_message", function(data) {
+				$(".messages_").append('<div class="message sm clearfix"><div>' + data.msg + '</div></div>');
+				scroll_top();
+			});
+
+			socket.on("chat_error", function(data) {
+				$(".chat_info").text(data);
+			});
+
+			$(".message_text").keypress(function(e) {
+				if (e.which == 13) {
+					socket.emit('send_message', { msg: $('.message_text').val() });
+					$('.message_text').val('');
+					return false;
+				}
+			});
+
+			$(".messages").on("mousewheel", function(e) {
+				if(e.deltaY > 0) {
+					stop_scrolling = true;
+					$(".scroll_down").fadeIn();
+				}
+			});
+
+			$(".scroll_down").on("click", function(e) {
+				e.preventDefault();
+				stop_scrolling = false;
+				scroll_top();
+				$(this).fadeOut();
+				return false;
+			});
+
+			$(document).on("click", "[data-mod='remove']", function(e) {
+				e.preventDefault();
+				var uqid = $(this).closest(".message").data("uqid");
+				socket.emit('mod_remove', { uqid: uqid });
+				return false;
+			});
+
+			$(document).on("click", "[data-mod='timeout']", function(e) {
+				e.preventDefault();
+				var message = $(this).closest(".message");
+				var uqid = message.data("uqid");
+				var username = message.find("a.author_link").text();
+				$("#mod_timeout").attr("uqid", uqid);
+				$(".utt_username").text(username);
+				$("[data-mod='timeout_confirm']").prop('disabled', false);
+				return false;
+			});
+
+			$(document).on("click", "[data-mod='timeout_confirm']", function(e) {
+				e.preventDefault();
+				var uqid = $("#mod_timeout").attr("uqid");
+				var time = $(".utt_time option:selected").val();
+				var reason = $(".utt_reason option:selected").val();
+				$("#mod_timeout").modal("hide");
+				socket.emit('mod_timeout', { uqid: uqid, time: time, reason: reason });
+				$(this).prop('disabled', true);
+				return false;
+			});
+
+			$(".modal").on("show.bs.modal", function() {
+				var curModal;
+				curModal = this;
+				$(".modal").each(function() {
+					if (this !== curModal) {
+						$(this).modal("hide");
+					}
+				});
+			});
+		});
+	</script>
+<% include main/footer %>
