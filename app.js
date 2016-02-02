@@ -88,19 +88,6 @@ app.use((req, res, next) => {
 	next(err);
 });
 
-/*
-redis.monitor(function (err, monitor) {
-	monitor.on('monitor', function (time, args) {
-		var arg = args.toString();
-		if(arg.indexOf("set,uo:") > -1 || arg.indexOf("del,uo:") > -1) {
-			db.users_online_total(function(data) {
-				io.emit('logged_users', { value: data, text: helpers.logged_users(data) });
-			});
-		}
-	});
-});
-*/
-
 if (app.get('env') === 'development') {
 	app.use((err, req, res, next) => {
 		res.status(err.status || 500);
