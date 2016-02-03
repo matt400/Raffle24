@@ -1,6 +1,8 @@
 var config = {
 	page_adress: 'example_address',
 	steam_api_key: 'example_api',
+	steam_bot_username: 'example',
+	steam_bot_password: 'example',
 	session_secret: 'example_secret',
 	postgres_connect: 'postgres://postgres:' + encodeURIComponent('example_password') + '@localhost:5432/postgres',
 	admin_color: '#ad0606',

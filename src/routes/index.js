@@ -3,15 +3,13 @@
 const express = require('express');
 const chat = require('../controllers/chat');
 const helpers = require('../controllers/helpers');
-
-var statistics = require('../statistics');
-
+const statistics = require('../statistics');
 const router = express.Router();
 
 router.get('/index', (req, res, next) => {
-	chat.permission(req.user.id).then(function(data) {
-		let has_perm = (req.isAuthenticated()) ? data.exists : false;
-		console.log(has_perm);
+	let user_id = (req.user) ? req.user.id : false;
+	chat.permission(user_id).then((data) => {
+		let has_perm = (data) ? data.exists : false;
 		res.render('index', {
 			user: req.user,
 			chatMod: has_perm,
