@@ -3,30 +3,22 @@
 const express = require('express');
 const chat = require('../controllers/chat');
 const helpers = require('../controllers/helpers');
-const server_stats = require('../statistics');
+
+var statistics = require('../statistics');
 
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
-	if(req.isAuthenticated()) {
-		chat.check_admin(req.user.id).then(function(admin) {
-			return admin;
-		}).then(function(admin) {
-			res.render('index', {
-				user: req.user,
-				chatMod: (admin.type > -1) ? true : false,
-				total_users: server_stats.logged_users,
-				total_users_text: helpers.logged_users(server_stats.logged_users)
-			});
-		});
-	} else {
+router.get('/index', (req, res, next) => {
+	chat.permission(req.user.id).then(function(data) {
+		let has_perm = (req.isAuthenticated()) ? data.exists : false;
+		console.log(has_perm);
 		res.render('index', {
 			user: req.user,
-			chatMod: false,
-			total_users: server_stats.logged_users,
-			total_users_text: helpers.logged_users(server_stats.logged_users)
+			chatMod: has_perm,
+			total_users: statistics.users_counter,
+			total_users_text: helpers.logged_users(statistics.users_counter)
 		});
-	}
+	});
 });
 
 module.exports = router;

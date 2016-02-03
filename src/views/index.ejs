@@ -251,6 +251,15 @@
 				$(".messages .tse-scroll-content").scrollTop(9999);
 			}
 
+			socket.on('connect', function() {
+				var uniqid = localStorage.getItem('uniqid');
+				if (!(uniqid)) {
+					var random_uqid = Math.random().toString(36).substring(3,16) + +new Date;
+					localStorage.setItem('uniqid', random_uqid);
+				}
+				socket.emit('login', uniqid);
+			});
+
 			socket.on('logged_users', function(data) {
 				$("#logged_users").text(data.value);
 				$("#logged_text").text(data.text);

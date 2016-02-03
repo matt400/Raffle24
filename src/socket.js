@@ -9,7 +9,8 @@ const config = require('../config');
 const helpers = require('../src/controllers/helpers');
 const chat = require('../src/controllers/chat');
 
-var logged_clients = [];
+var statistics = require('../src/statistics');
+var people = [];
 
 module.exports = (io) => {
 	// http://steamcommunity.com/market/priceoverview/?currency=1&appid=730&market_hash_name=StatTrak%E2%84%A2%20P250%20%7C%20Steel%20Disruption%20%28Factory%20New%29
@@ -28,10 +29,27 @@ module.exports = (io) => {
 			let avatar = user._json.avatarmedium;
 			let profile_link = user._json.profileurl;
 			let username = user.displayName;
-			let logged_rc = io.sockets.adapter.rooms['logged_on'];
+			let logged_temp = {};
 
-			console.log(Object.keys(io.engine.clients));
-			io.emit('logged_users', { value: Object.keys(io.engine.clients).length, text: helpers.logged_users(Object.keys(io.engine.clients).length) });
+			socket.on('login', function (uqid) {
+				if(!(logged_temp = people[uqid])) {
+					statistics.users_counter++;
+					logged_temp = people[uqid] = { uqid: uqid, opened_tabs: 0 };
+					socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+				} else {
+					if (!people.disconnected) {
+						people.opened_tabs++;
+						socket.disconnect();
+						console.log("Too many tabs");
+					}
+				}
+				if (logged_temp.disconnected) {
+					clearTimeout(logged_temp.timeout);
+					logged_temp.disconnected = false;
+				}
+				people[uqid] = logged_temp;
+				socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+			});
 
 			socket.on('send_message', (msgInfo) => {
 				let uqid = crypto.randomBytes(32).toString('hex');
@@ -49,17 +67,17 @@ module.exports = (io) => {
 								io.to(socket.id).emit('user_message', { msg: msg });
 							}
 						} else {
-							chat.check_admin(user.id).then(function(data) {
-								io.emit('new_message', { uqid: uqid, avatar: avatar, profile_link: profile_link, colorize_admin: ((data.type > -1) ? helpers.colorize_users(data.type) : ''), username: username, msg: msg });
+							chat.permission(user.id).then(function(data) {
+								io.emit('new_message', { uqid: uqid, avatar: avatar, profile_link: profile_link, colorize_admin: ((data.exists) ? helpers.colorize_users(data.type) : ''), username: username, msg: msg });
 								chat.new_message(uqid, user.id, username, avatar, msg, profile_link, socket.id, socket.request.sessionID);
 							});
 						}
 					});
 				}
 			});
-
-			chat.check_admin(user.id).then(function(admin) {
-				if(admin.type > -1) {
+			
+			chat.permission(user.id).then(function(perm) {
+				if(perm.exists) {
 					socket.on('mod_remove', (data) => {
 						chat.remove_message(data.uqid);
 						io.emit('remove_message', { uqid: data.uqid, msg: '<message deleted>' });
@@ -94,8 +112,20 @@ module.exports = (io) => {
 				}
 			});
 		
-			socket.on('disconnect', () => {
-				io.emit('logged_users', { value: Object.keys(io.engine.clients).length, text: helpers.logged_users(Object.keys(io.engine.clients).length) });
+			socket.on('disconnect', (type) => {
+				console.log(type);
+				if (type == 'booted' && logged_temp.tabs > 0) {
+					return;
+				}
+
+				logged_temp.disconnected = true;
+				logged_temp.timeout = setTimeout(function() {
+					if (logged_temp.disconnected) {
+						statistics.users_counter--;
+						delete people[logged_temp.uqid];
+						socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+					}
+				}, 2000)
 			});
 		}
 	});

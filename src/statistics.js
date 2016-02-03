@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = {
-	logged_users: 0
+	users_counter: 0
 };

@@ -5,9 +5,17 @@ const config = require('../../config.js');
 const client = require('../lib/postgres');
 
 var db = {
-	check_admin: (sid) => {
+	permission: (sid) => {
 		return client.db.query('SELECT * FROM chat_permissions WHERE user_id = $1 AND active = 1', sid).then(function(result) {
-			return ((result) ? result[0] : { type: -1 });
+			if(result) {
+				if(result[0].type > 0) {
+					return { exists: true, type: result[0].type };
+				} else {
+					return { exists: false };
+				}
+			} else {
+				return { exists: false };
+			}
 		}).catch(function (error) {
 			console.log(error); // logging
 		});
