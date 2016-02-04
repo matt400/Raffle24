@@ -10,17 +10,20 @@ const helpers = require('../src/controllers/helpers');
 const chat = require('../src/controllers/chat');
 
 var statistics = require('../src/statistics');
-var people = [];
 
-module.exports = (io) => {
+function socket(io) {
+	this.io = io;
+	this.people = [];
+}
+
+socket.prototype.init = function() {
 	// http://steamcommunity.com/market/priceoverview/?currency=1&appid=730&market_hash_name=StatTrak%E2%84%A2%20P250%20%7C%20Steel%20Disruption%20%28Factory%20New%29
-
-	io.on('connection', (socket) => {
+	this.io.on('connection', (socket) => {
 		let loggedOn = socket.request.session.passport && socket.request.session.isLoggedIn;
 
 		chat.get_last_messages().then((data) => {
 			data.forEach((data) => {
-				io.to(socket.id).emit('new_message', { uqid: data.uniq_id, avatar: data.user_avatar, profile_link: data.profile_link, colorize_admin: helpers.colorize_users(data.type), username: data.username, msg: data.message });
+				this.io.to(socket.id).emit('new_message', { uqid: data.uniq_id, avatar: data.user_avatar, profile_link: data.profile_link, colorize_admin: helpers.colorize_users(data.type), username: data.username, msg: data.message });
 			});
 		});
 
@@ -32,20 +35,20 @@ module.exports = (io) => {
 			let logged_temp = {};
 
 			socket.on('login', (uqid) => {
-				if(!(logged_temp = people[uqid])) {
+				if(!(logged_temp = this.people[uqid])) {
 					statistics.users_counter++;
-					logged_temp = people[uqid] = { uqid: uqid, opened_tabs: 0 };
+					logged_temp = this.people[uqid] = { uqid: uqid, opened_tabs: 0 };
 					socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
 				} else {
-					if (!people.disconnected) {
-						people.opened_tabs++;
+					if (!this.people.disconnected) {
+						this.people.opened_tabs++;
 					}
 				}
 				if (logged_temp.disconnected) {
 					clearTimeout(logged_temp.timeout);
 					logged_temp.disconnected = false;
 				}
-				people[uqid] = logged_temp;
+				this.people[uqid] = logged_temp;
 				socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
 			});
 
@@ -59,14 +62,14 @@ module.exports = (io) => {
 							if(!t.type) {
 								let tob = (!t.data.type) ? "You are timed out to " : "You are banned to ";
 								let msg =  tob + helpers.timestamp_convert(t.data.to_time) + " by '" + helpers.timeout_reason(t.data.reason_id.toString()) + "'";
-								io.to(socket.id).emit('user_message', { msg: msg });
+								this.io.to(socket.id).emit('user_message', { msg: msg });
 							} else {
 								let msg = "You are timed out and banned to " + helpers.timestamp_convert(t.data[0].to_time) + " by '" + helpers.timeout_reason(t.data[0].reason_id.toString()) + "'";
-								io.to(socket.id).emit('user_message', { msg: msg });
+								this.io.to(socket.id).emit('user_message', { msg: msg });
 							}
 						} else {
 							chat.permission(user.id).then((data) => {
-								io.emit('new_message', { uqid: uqid, avatar: avatar, profile_link: profile_link, colorize_admin: ((data.exists) ? helpers.colorize_users(data.type) : ''), username: username, msg: msg });
+								this.io.emit('new_message', { uqid: uqid, avatar: avatar, profile_link: profile_link, colorize_admin: ((data.exists) ? helpers.colorize_users(data.type) : ''), username: username, msg: msg });
 								chat.new_message(uqid, user.id, username, avatar, msg, profile_link, socket.id, socket.request.sessionID);
 							});
 						}
@@ -78,7 +81,7 @@ module.exports = (io) => {
 				if(perm.exists) {
 					socket.on('mod_remove', (data) => {
 						chat.remove_message(data.uqid);
-						io.emit('remove_message', { uqid: data.uqid, msg: '<message deleted>' });
+						this.io.emit('remove_message', { uqid: data.uqid, msg: '<message deleted>' });
 					});
 					socket.on('mod_timeout', (data) => {
 						let mod_reason = helpers.timeout_reason(data.reason);
@@ -96,19 +99,19 @@ module.exports = (io) => {
 											} else {
 												exists_msg = "This user has not wrote anything yet.";
 											}
-											io.to(socket.id).emit('server_message', { msg: exists_msg });
+											this.io.to(socket.id).emit('server_message', { msg: exists_msg });
 										} else {
 											chat.timeout_delete_messages(result.user_id).then((time) => {
 												let msg = time.username + ' has been timed out.';
 												//let omsg = "You has been timed out.";
 												let reason = 'Reason: ' + mod_reason;
 												//io.to(si).emit('server_message', { msg: omsg });
-												io.emit('user_timeout', { dl: time.dl, msg: msg, reason: reason });
+												this.io.emit('user_timeout', { dl: time.dl, msg: msg, reason: reason });
 											});
 										}
 									});
 								} else {
-									io.to(socket.id).emit('server_message', { msg: 'Nie znaleziono takiej wiadomości.' });
+									this.io.to(socket.id).emit('server_message', { msg: 'Nie znaleziono takiej wiadomości.' });
 								}
 							});
 						}
@@ -124,7 +127,7 @@ module.exports = (io) => {
 				logged_temp.timeout = setTimeout(() => {
 					if (logged_temp.disconnected) {
 						statistics.users_counter--;
-						delete people[logged_temp.uqid];
+						delete this.people[logged_temp.uqid];
 						socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
 					}
 				}, 2500)
@@ -132,3 +135,5 @@ module.exports = (io) => {
 		}
 	});
 }
+
+module.exports = exports = socket;

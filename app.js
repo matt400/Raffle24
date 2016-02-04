@@ -13,7 +13,6 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 
-const chat = require('./src/controllers/chat');
 const routes = require('./src/routes/index');
 const helpers = require('./src/controllers/helpers');
 const config = require('./config');
@@ -21,10 +20,18 @@ const config = require('./config');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const socket = require('./src/socket')(io);
 
-var sessionStore = new pgSession({ pg: pg, conString: config.postgres_connect, tableName: 'user_sessions' });
-var sessionMiddleware = session({ store: sessionStore, resave: false, saveUninitialized: false, cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, secret: config.session_secret });
+const listen = require('./src/lib/listener');
+listen.events(io);
+
+const socket = require('./src/socket');
+const bot = require('./src/controllers/bot');
+
+const socket_instance = new socket(io).init();
+const bot_instance = new bot(listen.emit);
+bot_instance.test();
+const sessionStore = new pgSession({ pg: pg, conString: config.postgres_connect, tableName: 'user_sessions' });
+const sessionMiddleware = session({ store: sessionStore, resave: false, saveUninitialized: false, cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, secret: config.session_secret });
 
 io.use((socket, next) => {
 	sessionMiddleware(socket.request, socket.request.res, next);

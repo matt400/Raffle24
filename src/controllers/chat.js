@@ -1,7 +1,6 @@
 'use strict';
 
 const Promise = require('bluebird');
-const config = require('../../config.js');
 const client = require('../lib/postgres');
 
 var db = {
@@ -64,7 +63,7 @@ var db = {
 			console.log(err); //logging
 		});
 	},
-	tob_exists: (user_id, callback) => {
+	tob_exists: (user_id) => {
 		return client.db.query('SELECT * FROM chat_mod_actions WHERE user_id = $1', user_id).then((result) => {
 			if(result.length) {
 				return Promise.map(result, (data) => {
@@ -101,7 +100,7 @@ var db = {
 			console.log(err); //logging
 		});
 	},
-	timeout_delete_messages: (user_id, callback) => {
+	timeout_delete_messages: (user_id) => {
 		let date_bef = new Date().setDate(new Date().getDate() - 3);
 		return client.db.query('SELECT * FROM chat WHERE user_id = $1 AND created_time <= $2', [user_id, date_bef]).then((result) => {
 			return Promise.map(result, (data) => {
@@ -117,4 +116,4 @@ var db = {
 	}
 };
 
-module.exports = db;
+module.exports = exports = db;
