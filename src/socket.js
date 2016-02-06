@@ -116,6 +116,11 @@ socket.prototype.init = function() {
 							});
 						}
 					});
+					socket.on('mod_ban', (data) => {
+						let mod_reason = helpers.timeout_reason(data.reason);
+						let mod_time = helpers.timeout_time(data.time);
+						
+					});
 				}
 			});
 		

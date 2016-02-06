@@ -101,13 +101,115 @@
 					</div>
 				</div>
 			</div>
-			<div class="bets col_">
-				<div class="circle life">
-					<div class="value">$16,000</div>
+			<div class="bets col_" id="bets">
+				<div class="circle life" id="circle">
+					<div class="fill_circle" style="height: 23%;"></div>
+					<div class="game_info" id="winner_">
+						<img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/5c/5c0f87b8d664aa7ee77411ef928bd4215e79d709_full.jpg" class="winner_avatar" />
+						<div class="winner_name">CHUCK NORRIS</div>
+						<div class="winner_text">wygrywa przedmioty o wartości</div>
+						<div class="winner_value">$1230 (80.68%)</div>
+					</div>
+					<div class="game_info">
+						<div class="game_text">Aktualna wartość w puli</div>
+						<div class="game_value">$135</div>
+					</div>
+					<div class="round_info">Hash: #fffffffffffff</div>
 				</div>
+				<div class="bets_history">
+					<div class="head">Ostatni zwycięzcy</div>
+					<div class="history tse-scrollable scroll">
+						<div class="tse-content">
+							<div class="user clearfix">
+								<div class="avatar">
+									<img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/5c/5c0f87b8d664aa7ee77411ef928bd4215e79d709_medium.jpg" />
+								</div>
+								<div class="user_info">
+									a
+								</div>
+								<div class="user_items">
+									b
+								</div>
+								<div class="value">
+									c
+								</div>
+							</div>
+							<div class="user clearfix">
+								<div class="avatar">
+									<img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/5c/5c0f87b8d664aa7ee77411ef928bd4215e79d709_medium.jpg" />
+								</div>
+								<div class="user_info">
+									a
+								</div>
+								<div class="user_items">
+									b
+								</div>
+								<div class="value">
+									c
+								</div>
+							</div>
+							<div class="user clearfix">
+								<div class="avatar">
+									<img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/5c/5c0f87b8d664aa7ee77411ef928bd4215e79d709_medium.jpg" />
+								</div>
+								<div class="user_info">
+									a
+								</div>
+								<div class="user_items">
+									b
+								</div>
+								<div class="value">
+									c
+								</div>
+							</div>
+							<div class="user clearfix">
+								<div class="avatar">
+									<img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/5c/5c0f87b8d664aa7ee77411ef928bd4215e79d709_medium.jpg" />
+								</div>
+								<div class="user_info">
+									a
+								</div>
+								<div class="user_items">
+									b
+								</div>
+								<div class="value">
+									c
+								</div>
+							</div>
+							<div class="user clearfix">
+								<div class="avatar">
+									<img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/5c/5c0f87b8d664aa7ee77411ef928bd4215e79d709_medium.jpg" />
+								</div>
+								<div class="user_info">
+									a
+								</div>
+								<div class="user_items">
+									b
+								</div>
+								<div class="value">
+									c
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+					<!--<div class="value">$16,000</div>-->
 				<div class="information_box">Ze względu na zmiany w systemie wymian Steam, musisz mieć włączony Authenticator komórkowy Steam, przez co najmniej 7 dni!</div>
 			</div>
 			<div class="chat col_">
+				<div class="box">
+					<div class="head">Najwięksi farciarze</div>
+					<div class="box_content">
+						
+					</div>
+				</div>
+				<div class="box">
+					<div class="head">Najwięksi farciarze</div>
+					<div class="box_content">
+						
+					</div>
+				</div>
+				<div class="chat_head">Chat</div>
 				<div class="messages tse-scrollable scroll">
 					<a href="#" class="scroll_down"><span class="glyphicon glyphicon-arrow-down"></a>
 					<div class="tse-content messages_"></div>
@@ -266,10 +368,10 @@
 			});
 
 			socket.on("new_message", function(data) {
-				$(".messages_").append('<div class="message avatar clearfix" style="background-image: url(\'' + data.avatar + '\');" data-uqid="' + data.uqid + '"><span class="author"><a href="' + data.profile_link + '" class="author_link" target="_blank"' + data.colorize_admin +'>' + data.username + '</a><% if(chatMod) { %><div class="mod"><div class="glyphicon glyphicon-remove" data-mod="remove" title="Usuń wiadomość"></div> <div class="glyphicon glyphicon-time" title="Timeout" data-toggle="modal" data-mod="timeout" data-target="#mod_timeout"></div> <div class="glyphicon glyphicon-ban-circle" data-mod="ban" title="Zbanuj gracza"></div></div><% } %></span><span class="text">' + data.msg + '</span></div>');
 				if(messages >= 80) {
 					$('.message:first').remove();
 				}
+				$(".messages_").append('<div class="message avatar clearfix" style="background-image: url(\'' + data.avatar + '\');" data-uqid="' + data.uqid + '"><span class="author"><a href="' + data.profile_link + '" class="author_link" target="_blank"' + data.colorize_admin +'>' + data.username + '</a><% if(chatMod) { %><div class="mod"><div class="glyphicon glyphicon-remove" data-mod="remove" title="Usuń wiadomość"></div> <div class="glyphicon glyphicon-time" title="Timeout" data-toggle="modal" data-mod="timeout" data-target="#mod_timeout"></div> <div class="glyphicon glyphicon-ban-circle" data-mod="ban" title="Zbanuj gracza"></div></div><% } %></span><span class="text">' + data.msg + '</span></div>');
 				if(!stop_scrolling) {
 					scroll_top();
 				}

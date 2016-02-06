@@ -1,6 +1,7 @@
 'use strict';
 
 const Promise = require('bluebird');
+const client = require('../lib/postgres');
 
 function bot(emitter) {
 	this.emitter = emitter;

@@ -29,7 +29,6 @@ const bot = require('./src/controllers/bot');
 
 const socket_instance = new socket(io).init();
 const bot_instance = new bot(listen.emit);
-bot_instance.test();
 const sessionStore = new pgSession({ pg: pg, conString: config.postgres_connect, tableName: 'user_sessions' });
 const sessionMiddleware = session({ store: sessionStore, resave: false, saveUninitialized: false, cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, secret: config.session_secret });
 
