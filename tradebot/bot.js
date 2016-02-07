@@ -1,4 +1,6 @@
 var SteamUser = require('steam-user');
+var Steamcommunity = require('steamcommunity');
+var SteamTotp = require('steam-totp');
 var TradeOfferManager = require('steam-tradeoffer-manager');
 var fs = require('fs');
 
@@ -10,10 +12,14 @@ var manager = new TradeOfferManager({
 	"domain": "raffle24.net",
 	"language": "pl"
 });
+var community = new Steamcommunity();
+
+console.log(SteamTotp.getAuthCode("sharedSecret"));
 
 var logOnOptions = {
 	"accountName": config.steam_bot_username,
-	"password": config.steam_bot_password
+	"password": config.steam_bot_password,
+	"twoFactorCode": SteamTotp.getAuthCode("sharedSecret")
 };
 
 if(fs.existsSync('polldata.json')) {
@@ -38,6 +44,9 @@ client.on('webSession', function(sessionID, cookies) {
 
 		console.log("Got API key: " + manager.apiKey);
 	});
+	
+	community.setCookies(cookies);
+	community.startConfirmationChecker(30000, "identitySecret"); // Checks and accepts confirmations every 30 seconds
 });
 
 manager.on('newOffer', function(offer) {

@@ -275,64 +275,7 @@
 			</div>
 		</div>
 	</div>
-	<% if(chatMod) { %>
-	<div class="modal fade" id="mod_timeout" tabindex="-1" role="dialog" aria-labelledby="mod_timeout">
-		<div class="mod_dialog" role="document">
-			<div class="mod_content">
-				<div class="modal_header">
-					<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="rules">Timeout dla gracza</h4>
-				</div>
-				<div class="modal_body">
-					<div class="form-horizontal clearfix">
-						<div class="form-group">
-							<label class="col-sm-2 control-label">Nick:</label>
-							<div class="col-sm-10">
-								<p class="form-control-static utt_username">Yii</p>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-sm-2 control-label">Czas:</label>
-							<div class="col-sm-5">
-								<p class="form-control-static">
-									<select class="form-control utt_time">
-										<option value="1">Minuta</option>
-										<option value="2">5 minut</option>
-										<option value="3">10 minut</option>
-										<option value="4">15 minut</option>
-										<option value="5">20 minut</option>
-										<option value="6">30 minut</option>
-										<option value="7">1 godzina</option>
-										<option value="8">2 godziny</option>
-										<option value="9">3 godziny</option>
-										<option value="10">4 godziny</option>
-										<option value="11">6 godzin</option>
-										<option value="12">12 godzin</option>
-									</select>
-								</p>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-sm-2 control-label">Powód:</label>
-							<div class="col-sm-5">
-								<p class="form-control-static">
-									<select class="form-control utt_reason">
-										<option value="1">Obrażanie / wyzywanie</option>
-										<option value="2">Reklama</option>
-										<option value="3">Spam</option>
-									</select>
-								</p>
-							</div>
-						</div>
-						<div class="pull-right clearfix">
-							<button type="submit" class="btn btn-primary" data-mod="timeout_confirm">Potwierdź</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<% } %>
+	<% if(chatMod) { %><% include moderation.ejs %><% } %>
 	<script src="socket.io/socket.io.js"></script>
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
@@ -371,7 +314,7 @@
 				if(messages >= 80) {
 					$('.message:first').remove();
 				}
-				$(".messages_").append('<div class="message avatar clearfix" style="background-image: url(\'' + data.avatar + '\');" data-uqid="' + data.uqid + '"><span class="author"><a href="' + data.profile_link + '" class="author_link" target="_blank"' + data.colorize_admin +'>' + data.username + '</a><% if(chatMod) { %><div class="mod"><div class="glyphicon glyphicon-remove" data-mod="remove" title="Usuń wiadomość"></div> <div class="glyphicon glyphicon-time" title="Timeout" data-toggle="modal" data-mod="timeout" data-target="#mod_timeout"></div> <div class="glyphicon glyphicon-ban-circle" data-mod="ban" title="Zbanuj gracza"></div></div><% } %></span><span class="text">' + data.msg + '</span></div>');
+				$(".messages_").append('<div class="message avatar clearfix" style="background-image: url(\'' + data.avatar + '\');" data-uqid="' + data.uqid + '"><span class="author"><a href="' + data.profile_link + '" class="author_link" target="_blank"' + data.colorize_admin +'>' + data.username + '</a><% if(chatMod) { %><div class="mod"><div class="glyphicon glyphicon-remove" data-mod="remove" title="Usuń wiadomość"></div> <div class="glyphicon glyphicon-time" title="Timeout" data-toggle="modal" data-mod="timeout" data-target="#mod_timeout"></div> <div class="glyphicon glyphicon-ban-circle" data-toggle="modal" data-mod="ban" title="Zbanuj gracza" data-target="#mod_ban"></div></div><% } %></span><span class="text">' + data.msg + '</span></div>');
 				if(!stop_scrolling) {
 					scroll_top();
 				}
@@ -384,7 +327,7 @@
 				msg.text(data.msg);
 			});
 
-			socket.on("user_timeout", function(data) {
+			socket.on("user_action", function(data) {
 				for(var msg in data.dl) {
 					var result = data.dl[msg];
 					$(".message[data-uqid='" + result + "']").remove();
@@ -448,6 +391,18 @@
 				return false;
 			});
 
+
+			$(document).on("click", "[data-mod='ban']", function(e) {
+				e.preventDefault();
+				var message = $(this).closest(".message");
+				var uqid = message.data("uqid");
+				var username = message.find("a.author_link").text();
+				$("#mod_ban").attr("uqid", uqid);
+				$(".utb_username").text(username);
+				$("[data-mod='ban_confirm']").prop('disabled', false);
+				return false;
+			});
+
 			$(document).on("click", "[data-mod='timeout_confirm']", function(e) {
 				e.preventDefault();
 				var uqid = $("#mod_timeout").attr("uqid");
@@ -455,6 +410,17 @@
 				var reason = $(".utt_reason option:selected").val();
 				$("#mod_timeout").modal("hide");
 				socket.emit('mod_timeout', { uqid: uqid, time: time, reason: reason });
+				$(this).prop('disabled', true);
+				return false;
+			});
+
+			$(document).on("click", "[data-mod='ban_confirm']", function(e) {
+				e.preventDefault();
+				var uqid = $("#mod_ban").attr("uqid");
+				var time = $(".utb_time option:selected").val();
+				var reason = $(".utb_reason option:selected").val();
+				$("#mod_ban").modal("hide");
+				socket.emit('mod_ban', { uqid: uqid, time: time, reason: reason });
 				$(this).prop('disabled', true);
 				return false;
 			});

@@ -89,26 +89,22 @@ app.get('/logout', (req, res) => {
 });
 
 app.use((req, res, next) => {
-	var err = new Error();
+	var err = new Error('File not found');
 	err.status = 404;
 	next(err);
 });
 
-if (app.get('env') === 'development') {
-	app.use((err, req, res, next) => {
-		res.status(err.status || 500);
-		res.render('error', {
-			message: err.message,
-			error: err
-		});
-	});
-}
+app.use((req, res, next) => {
+	var err = new Error();
+	err.status = 500;
+	next(err);
+});
 
 app.use((err, req, res, next) => {
 	res.status(err.status || 500);
 	res.render('error', {
 		message: err.message,
-		error: {}
+		error: res.statusCode
 	});
 });
 

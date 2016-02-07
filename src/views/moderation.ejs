@@ -1,0 +1,107 @@
+<div class="modal fade" id="mod_timeout" tabindex="-1" role="dialog" aria-labelledby="mod_timeout">
+	<div class="mod_dialog" role="document">
+		<div class="mod_content">
+			<div class="modal_header">
+				<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="rules">Timeout dla gracza</h4>
+			</div>
+			<div class="modal_body">
+				<div class="form-horizontal clearfix">
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Nick:</label>
+						<div class="col-sm-10">
+							<p class="form-control-static utt_username">Yii</p>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Czas:</label>
+						<div class="col-sm-5">
+							<p class="form-control-static">
+								<select class="form-control utt_time">
+									<option value="1">Minuta</option>
+									<option value="2">5 minut</option>
+									<option value="3">10 minut</option>
+									<option value="4">15 minut</option>
+									<option value="5">20 minut</option>
+									<option value="6">30 minut</option>
+									<option value="7">1 godzina</option>
+									<option value="8">2 godziny</option>
+									<option value="9">3 godziny</option>
+									<option value="10">4 godziny</option>
+									<option value="11">6 godzin</option>
+									<option value="12">12 godzin</option>
+								</select>
+							</p>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Powód:</label>
+						<div class="col-sm-5">
+							<p class="form-control-static">
+								<select class="form-control utt_reason">
+									<option value="1">Obrażanie / wyzywanie</option>
+									<option value="2">Reklama</option>
+									<option value="3">Spam</option>
+								</select>
+							</p>
+						</div>
+					</div>
+					<div class="pull-right clearfix">
+						<button type="submit" class="btn btn-primary" data-mod="timeout_confirm">Potwierdź</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="mod_ban" tabindex="-1" role="dialog" aria-labelledby="mod_ban">
+	<div class="mod_dialog" role="document">
+		<div class="mod_content">
+			<div class="modal_header">
+				<button type="button" class="modal_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="rules">Ban dla gracza</h4>
+			</div>
+			<div class="modal_body">
+				<div class="form-horizontal clearfix">
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Nick:</label>
+						<div class="col-sm-10">
+							<p class="form-control-static utb_username">Yii</p>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Czas:</label>
+						<div class="col-sm-5">
+							<p class="form-control-static">
+								<select class="form-control utb_time">
+									<option value="1">2 dni</option>
+									<option value="2">3 dni</option>
+									<option value="3">4 dni</option>
+									<option value="4">Tydzień</option>
+									<option value="5">2 tygodnie</option>
+									<option value="6">Miesiąc</option>
+									<option value="7">Permanent</option>
+								</select>
+							</p>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Powód:</label>
+						<div class="col-sm-5">
+							<p class="form-control-static">
+								<select class="form-control utb_reason">
+									<option value="1">Obrażanie / wyzywanie</option>
+									<option value="2">Reklama</option>
+									<option value="3">Spam</option>
+								</select>
+							</p>
+						</div>
+					</div>
+					<div class="pull-right clearfix">
+						<button type="submit" class="btn btn-primary" data-mod="ban_confirm">Potwierdź</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

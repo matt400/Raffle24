@@ -49,7 +49,7 @@ var db = {
 		});
 	},
 	new_mod_action: (user_id, reason_id, type, time) => {
-		let to_time = ~~((Date.now() + 1000 * time) / 1000);
+		let to_time = (time > 0) ? ~~((Date.now() + (1000 * time)) / 1000) : 0;
 		return client.db.query('SELECT * FROM chat_mod_actions WHERE user_id = $1 AND type = $2', [user_id, type]).then((result) => {
 			if(result.length) {
 				return { exists: true, data: result[0] };
@@ -100,7 +100,7 @@ var db = {
 			console.log(err); //logging
 		});
 	},
-	timeout_delete_messages: (user_id) => {
+	chat_delete_messages: (user_id) => {
 		let date_bef = new Date().setDate(new Date().getDate() - 3);
 		return client.db.query('SELECT * FROM chat WHERE user_id = $1 AND created_time <= $2', [user_id, date_bef]).then((result) => {
 			return Promise.map(result, (data) => {

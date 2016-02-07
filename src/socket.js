@@ -61,10 +61,10 @@ socket.prototype.init = function() {
 						if(t.exists) {
 							if(!t.type) {
 								let tob = (!t.data.type) ? "You are timed out to " : "You are banned to ";
-								let msg =  tob + helpers.timestamp_convert(t.data.to_time) + " by '" + helpers.timeout_reason(t.data.reason_id.toString()) + "'";
+								let msg =  tob + helpers.timestamp_convert(t.data.to_time) + " by '" + helpers.mod_reason(t.data.reason_id.toString()) + "'";
 								this.io.to(socket.id).emit('user_message', { msg: msg });
 							} else {
-								let msg = "You are timed out and banned to " + helpers.timestamp_convert(t.data[0].to_time) + " by '" + helpers.timeout_reason(t.data[0].reason_id.toString()) + "'";
+								let msg = "You are timed out and banned to " + helpers.timestamp_convert(t.data[0].to_time) + " by '" + helpers.mod_reason(t.data[0].reason_id.toString()) + "'";
 								this.io.to(socket.id).emit('user_message', { msg: msg });
 							}
 						} else {
@@ -84,7 +84,7 @@ socket.prototype.init = function() {
 						this.io.emit('remove_message', { uqid: data.uqid, msg: '<message deleted>' });
 					});
 					socket.on('mod_timeout', (data) => {
-						let mod_reason = helpers.timeout_reason(data.reason);
+						let mod_reason = helpers.mod_reason(data.reason);
 						let mod_time = helpers.timeout_time(data.time);
 						if(mod_reason && mod_time) {
 							chat.message_by_uqid(data.uqid).then((result) => {
@@ -92,21 +92,21 @@ socket.prototype.init = function() {
 									chat.new_mod_action(result.user_id, data.reason, 0, mod_time).then((mod_action) => {
 										if(mod_action.exists) {
 											let actual_date = ~~(Date.now() / 1000);
-											let ma_reason = helpers.timeout_reason(mod_action.data.reason_id.toString());
+											let ma_reason = helpers.mod_reason(mod_action.data.reason_id.toString());
 											let exists_msg;
 											if(mod_action.data.to_time > actual_date) {
-												exists_msg = "This user is already timed out by '" + ma_reason + "', timeout expires <strong>" + helpers.timestamp_convert(mod_action.data.to_time) + "</strong>";
+												exists_msg = "This user is already timed out by '" + ma_reason + "'. Expires <strong>" + helpers.timestamp_convert(mod_action.data.to_time) + "</strong>";
 											} else {
 												exists_msg = "This user has not wrote anything yet.";
 											}
 											this.io.to(socket.id).emit('server_message', { msg: exists_msg });
 										} else {
-											chat.timeout_delete_messages(result.user_id).then((time) => {
+											chat.chat_delete_messages(result.user_id).then((time) => {
 												let msg = time.username + ' has been timed out.';
 												//let omsg = "You has been timed out.";
 												let reason = 'Reason: ' + mod_reason;
 												//io.to(si).emit('server_message', { msg: omsg });
-												this.io.emit('user_timeout', { dl: time.dl, msg: msg, reason: reason });
+												this.io.emit('user_action', { dl: time.dl, msg: msg, reason: reason });
 											});
 										}
 									});
@@ -117,9 +117,39 @@ socket.prototype.init = function() {
 						}
 					});
 					socket.on('mod_ban', (data) => {
-						let mod_reason = helpers.timeout_reason(data.reason);
-						let mod_time = helpers.timeout_time(data.time);
-						
+						let mod_reason = helpers.mod_reason(data.reason);
+						let mod_time = helpers.ban_time(data.time);
+						if(mod_reason && mod_time) {
+							chat.message_by_uqid(data.uqid).then((result) => {
+								if(result) {
+									chat.new_mod_action(result.user_id, data.reason, 1, mod_time).then((mod_action) => {
+										if(mod_action.exists) {
+											let actual_date = ~~(Date.now() / 1000);
+											let ma_reason = helpers.mod_reason(mod_action.data.reason_id.toString());
+											let exists_msg;
+											if(mod_action.data.to_time > 0) {
+												if(mod_action.data.to_time > actual_date) {
+													exists_msg = "This user is already banned by '" + ma_reason + "'. Expires <strong>" + helpers.timestamp_convert(mod_action.data.to_time) + "</strong>";
+												} else {
+													exists_msg = "This user has not wrote anything yet.";
+												}
+											} else {
+												exists_msg = "This user is already permanent banned by '" + ma_reason + "'";
+											}
+											this.io.to(socket.id).emit('server_message', { msg: exists_msg });
+										} else {
+											chat.chat_delete_messages(result.user_id).then((time) => {
+												let msg = time.username + ' has been banned.';
+												//let omsg = "You has been timed out.";
+												let reason = 'Reason: ' + mod_reason;
+												//io.to(si).emit('server_message', { msg: omsg });
+												this.io.emit('user_action', { dl: time.dl, msg: msg, reason: reason });
+											});
+										}
+									});
+								}
+							});
+						}
 					});
 				}
 			});

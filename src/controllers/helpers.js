@@ -64,7 +64,35 @@ var helpers = {
 				break;
 		}
 	},
-	timeout_reason: (type) => {
+	ban_time: (type) => {
+		switch(type) {
+			case '1':
+				return 172800;
+				break;
+			case '2':
+				return 259200;
+				break;
+			case '3':
+				return 345600;
+				break;
+			case '4':
+				return 604800;
+				break;
+			case '5':
+				return 1209600;
+				break;
+			case '6':
+				return 2592000;
+				break;
+			case '7':
+				return -1;
+				break;
+			default:
+				return false;
+				break;
+		}
+	},
+	mod_reason: (type) => {
 		switch(type) {
 			case '1':
 				return 'Obrażanie / wyzywanie';
