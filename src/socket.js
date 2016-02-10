@@ -2,12 +2,13 @@
 
 const crypto = require('crypto');
 const Promise = require('bluebird');
+const ejs = require('ejs');
 const validator = require('validator');
 const xssFilters = require('xss-filters');
 
 const config = require('../config');
 const helpers = require('../src/controllers/helpers');
-const chat = require('../src/controllers/chat');
+const chat = require('../src/database/chat');
 
 var statistics = require('../src/statistics');
 
@@ -16,10 +17,23 @@ function socket(io) {
 	this.people = [];
 }
 
+socket.prototype.ic = function(mode) {
+	if(mode) {
+		statistics.users_counter++;
+		this.io.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+	} else {
+		statistics.users_counter--;
+		this.io.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+	}
+}
+
 socket.prototype.init = function() {
 	// http://steamcommunity.com/market/priceoverview/?currency=1&appid=730&market_hash_name=StatTrak%E2%84%A2%20P250%20%7C%20Steel%20Disruption%20%28Factory%20New%29
 	this.io.on('connection', (socket) => {
-		let loggedOn = socket.request.session.passport && socket.request.session.isLoggedIn;
+		let req = socket.request;
+		let loggedOn = req.session.passport && req.session.isLoggedIn;
+
+		//chat.get_slow_mode("chat_slow_mode");
 
 		chat.get_last_messages().then((data) => {
 			data.forEach((data) => {
@@ -28,7 +42,7 @@ socket.prototype.init = function() {
 		});
 
 		if (loggedOn) {
-			let user = socket.request.session.passport.user;
+			let user = req.session.passport.user;
 			let avatar = user._json.avatarmedium;
 			let profile_link = user._json.profileurl;
 			let username = user.displayName;
@@ -36,9 +50,8 @@ socket.prototype.init = function() {
 
 			socket.on('login', (uqid) => {
 				if(!(logged_temp = this.people[uqid])) {
-					statistics.users_counter++;
 					logged_temp = this.people[uqid] = { uqid: uqid, opened_tabs: 0 };
-					socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+					this.ic(true);
 				} else {
 					if (!this.people.disconnected) {
 						this.people.opened_tabs++;
@@ -49,7 +62,7 @@ socket.prototype.init = function() {
 					logged_temp.disconnected = false;
 				}
 				this.people[uqid] = logged_temp;
-				socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+				//socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
 			});
 
 			socket.on('send_message', (msgInfo) => {
@@ -69,8 +82,17 @@ socket.prototype.init = function() {
 							}
 						} else {
 							chat.permission(user.id).then((data) => {
-								this.io.emit('new_message', { uqid: uqid, avatar: avatar, profile_link: profile_link, colorize_admin: ((data.exists) ? helpers.colorize_users(data.type) : ''), username: username, msg: msg });
-								chat.new_message(uqid, user.id, username, avatar, msg, profile_link, socket.id, socket.request.sessionID);
+								if(data.exists) {
+									if(msg.substr(0, 1) == "!") {
+										this.chat_command(msg, socket.id);
+									} else {
+										this.io.emit('new_message', { uqid: uqid, avatar: avatar, profile_link: profile_link, colorize_admin: helpers.colorize_users(data.type), username: username, msg: msg });
+										chat.new_message(uqid, user.id, username, avatar, msg, profile_link, socket.id, req.sessionID);
+									}
+								} else {
+									this.io.emit('new_message', { uqid: uqid, avatar: avatar, profile_link: profile_link, colorize_admin: '', username: username, msg: msg });
+									chat.new_message(uqid, user.id, username, avatar, msg, profile_link, socket.id, req.sessionID);
+								}
 							});
 						}
 					});
@@ -161,14 +183,57 @@ socket.prototype.init = function() {
 				logged_temp.disconnected = true;
 				logged_temp.timeout = setTimeout(() => {
 					if (logged_temp.disconnected) {
-						statistics.users_counter--;
 						delete this.people[logged_temp.uqid];
-						socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
+						this.ic(false);
 					}
 				}, 2500)
 			});
 		}
 	});
+}
+
+socket.prototype.chat_command = function(msg, socket) {
+	let m = msg.substr(1).split(' ');
+	let t = m[1];
+	// todo global info
+	switch(m[0]) {
+		case 'unban':
+			if(!isNaN(t) && t.length > 16 && t.length < 20) {
+				chat.remove_action(t, 1).then((result) => {
+					if(result > 0) {
+						this.io.to(socket).emit('server_message', { msg: "Użytkownik o ID " + t + " został odbanowany." });
+					} else {
+						this.io.to(socket).emit('server_message', { msg: "Nie istnieje użytkownik o ID: " + t });
+					}
+				});
+			} else {
+				this.io.to(socket).emit('server_message', { msg: "Nieprawidłowy format" });
+			}
+			break;
+		case 'untimeout':
+			if(!isNaN(t) && t.length > 16 && t.length < 20) {
+				chat.remove_action(t, 0).then((result) => {
+					if(result > 0) {
+						this.io.to(socket).emit('server_message', { msg: "Użytkownik o ID " + t + " nie ma już timeouta." });
+					} else {
+						this.io.to(socket).emit('server_message', { msg: "Nie istnieje użytkownik o ID: " + t });
+					}
+				});
+			} else {
+				this.io.to(socket).emit('server_message', { msg: "Nieprawidłowy format" });
+			}
+			break;
+		case 'slowmode':
+			this.io.to(socket).emit('server_message', { msg: "!slowmode" });
+			break;
+		case 'help':
+			let help = "<ol><li><strong>!unban (SteamID64)</strong></li><li><strong>!untimeout (SteamID64)</strong></li><li><strong>!slowmode (seconds)</strong> - 0 wyłączenie</li></ol>";
+			this.io.to(socket).emit('server_message', { msg: help });
+			break;
+		default:
+			this.io.to(socket).emit('server_message', { msg: "Komenda nie istnieje. Napisz !help, aby uzyskać wszystkie komendy." });
+			break;
+	}
 }
 
 module.exports = exports = socket;

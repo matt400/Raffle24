@@ -275,7 +275,7 @@
 			</div>
 		</div>
 	</div>
-	<% if(chatMod) { %><% include moderation.ejs %><% } %>
+	<% if(chatMod) { %><% include chat/chat_mod.ejs %><% } %>
 	<script src="socket.io/socket.io.js"></script>
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
@@ -298,6 +298,7 @@
 
 			socket.on('connect', function() {
 				var uniqid = localStorage.getItem('uniqid');
+				$(".messages_").html();
 				if (!(uniqid)) {
 					var random_uqid = Math.random().toString(36).substring(3,16) + +new Date;
 					localStorage.setItem('uniqid', random_uqid);
@@ -324,6 +325,7 @@
 
 			socket.on("remove_message", function(data) {
 				var msg = $(".message[data-uqid='" + data.uqid + "']").find(".text");
+				messages = 0;
 				msg.text(data.msg);
 			});
 
