@@ -4,9 +4,14 @@ const Promise = require('bluebird');
 const client = require('../lib/postgres');
 
 var db = {
-	global_settings: (key) => {
-		return client.db.one('SELECT value FROM global_settings WHERE key = $1', key).then((result) => {
-			return result.value;
+	params_by_key: (keys_id, callback) => {
+		client.db.any('SELECT value FROM global_params WHERE id = ANY($1::INT[])', keys_id).then((result) => {
+			callback(result);
+		});
+	},
+	update_game_params: (params) => {
+		return client.db.none('UPDATE global_params gp SET value = c.value FROM (VALUES (2, $1::text), (3, $2::text), (4, $3::text), (5, $4::text)) AS c(id, value) WHERE c.id = gp.id', params).catch((err) => {
+			console.log(err);// logging
 		});
 	}
 };

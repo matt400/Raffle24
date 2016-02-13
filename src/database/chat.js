@@ -104,9 +104,9 @@ var db = {
 	},
 	permission: (sid) => {
 		if(sid) {
-			return client.db.query('SELECT * FROM chat_permissions WHERE user_id = $1 AND active = 1', sid).then((result) => {
+			return client.db.query('SELECT * FROM chat_permissions WHERE user_id = $1', sid).then((result) => {
 				if(result) {
-					if(result[0].type > 0) {
+					if(result[0].type > 0 && result[0].active) {
 						return { exists: true, type: result[0].type };
 					} else {
 						return { exists: false };

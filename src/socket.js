@@ -2,7 +2,6 @@
 
 const crypto = require('crypto');
 const Promise = require('bluebird');
-const ejs = require('ejs');
 const validator = require('validator');
 const xssFilters = require('xss-filters');
 
@@ -62,7 +61,6 @@ socket.prototype.init = function() {
 					logged_temp.disconnected = false;
 				}
 				this.people[uqid] = logged_temp;
-				//socket.emit('logged_users', { value: statistics.users_counter, text: helpers.logged_users(statistics.users_counter) });
 			});
 
 			socket.on('send_message', (msgInfo) => {
@@ -197,6 +195,9 @@ socket.prototype.chat_command = function(msg, socket) {
 	let t = m[1];
 	// todo global info
 	switch(m[0]) {
+		case 'addperm':
+
+		break;
 		case 'unban':
 			if(!isNaN(t) && t.length > 16 && t.length < 20) {
 				chat.remove_action(t, 1).then((result) => {
@@ -227,7 +228,7 @@ socket.prototype.chat_command = function(msg, socket) {
 			this.io.to(socket).emit('server_message', { msg: "!slowmode" });
 			break;
 		case 'help':
-			let help = "<ol><li><strong>!unban (SteamID64)</strong></li><li><strong>!untimeout (SteamID64)</strong></li><li><strong>!slowmode (seconds)</strong> - 0 wyłączenie</li></ol>";
+			let help = "<ol><li><strong>!addperm (SteamID64) (1 - admin, 2 - moderator)</strong></li><li><strong>!unban (SteamID64)</strong></li><li><strong>!untimeout (SteamID64)</strong></li><li><strong>!slowmode (seconds)</strong> - 0 wyłączenie</li></ol>";
 			this.io.to(socket).emit('server_message', { msg: help });
 			break;
 		default:

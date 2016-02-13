@@ -4,7 +4,6 @@ const express = require('express');
 const session = require('express-session');
 const pg = require('pg');
 const pgSession = require('connect-pg-simple')(session);
-const connect = require('connect');
 const path = require('path');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
@@ -25,10 +24,11 @@ const listen = require('./src/lib/listener');
 listen.events(io);
 
 const socket = require('./src/socket');
-const bot = require('./src/controllers/bot');
+const game = require('./src/controllers/game');
 
 const socket_instance = new socket(io).init();
-const bot_instance = new bot(listen.emit);
+const game_instance = new game(listen.emit);
+
 const sessionStore = new pgSession({ pg: pg, conString: config.postgres_connect, tableName: 'user_sessions' });
 const sessionMiddleware = session({ store: sessionStore, resave: false, saveUninitialized: false, cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, secret: config.session_secret });
 
