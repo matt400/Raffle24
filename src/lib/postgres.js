@@ -5,4 +5,4 @@ const pgp = require('pg-promise')({ promiseLib: Promise }); // bluebird > es6 pr
 const config = require('../../config');
 var db = pgp(config.postgres_connect);
 
-module.exports = { pgp, db };
+module.exports = exports = { pgp, db };

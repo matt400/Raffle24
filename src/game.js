@@ -1,15 +1,24 @@
 'use strict';
 
 const Promise = require('bluebird');
+const net = require('net');
 const crypto = require('crypto');
 const checksum = crypto.createHash('sha1');
-const game_db = require('../database/game');
-const global_db = require('../database/global');
+const game_db = require('./database/game');
+const global_db = require('./database/global');
 
-function game(emitter) {
+const game_server = net.createServer((socket) => {
+	socket.pipe(socket);
+}).listen(4447);
+
+const game_client = net.connect({ port: 4447 });
+game_client.on("data", (data) => {
+	console.log(data.toString());
+});
+
+function game() {
 	let that = this;
 
-	this.emitter = emitter;
 	this.mtp_timer = 120; // more than one player timer
 	this.game_started = false;
 	this.countdown_started = false;
@@ -69,7 +78,7 @@ game.prototype.new_round = function() {
 	this.game_started = false;
 	this.all_points = 0;
 
-	this.emitter.emit("new_round", { game_hash, round_start_signature });
+	game_client.write({ mode: "new_round" });
 };
 
 game.prototype.get_winner = function(current_game_hash, current_winning_perc) {
@@ -90,6 +99,7 @@ game.prototype.get_winner = function(current_game_hash, current_winning_perc) {
 		});
 		console.log(lucky_player);
 	});
+	game_client.write("data", { mode: "test", data: current_game_hash });
 };
 
 game.prototype.round_start = function() {
@@ -135,15 +145,15 @@ game.prototype.new_player = function(user_id, items_data, username, profile_link
 
 				game_db.player_update(current_items, current_value, current_points, add_time);
 
-				this.emitter.emit("new_player", { type: 2 });
+				game_client.write({ mode: "new_player", type: 2 });
 			} else {
 				this.new_player_process(user_id, items_data, value, username, profile_link);
-				this.emitter.emit("new_player", { type: 1 });
+				game_client.write({ mode: "new_player", type: 1 });
 			}
 		} else {
 			setTimeout(function() {
 				this.new_player_process(user_id, items_data, value, username, profile_link);
-				this.emitter.emit("new_player", { type: 0 });
+				game_client.write({ mode: "new_player", type: 0 });
 			}, 10000);
 		}
 	});
