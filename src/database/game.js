@@ -16,8 +16,9 @@ var db = {
 			console.log(err); // logging
 		});
 	},
-	add_winner: (user_id, game_hash, game_items) => {
-		return client.db.none("INSERT INTO game_winners(user_id, game_hash, game_items, created_time) VALUES($1, $2, $3, $4)", [user_id, game_hash, game_items, created_time]).catch((err) => {
+	add_winner: (user_id, round_info, game_items) => {
+		// round_info[JSON]: { round_hash: "", round_signature: "", round_winning_perc: float, round_players: integer }
+		return client.db.none("INSERT INTO game_winners(user_id, game_items, created_time, round_info) VALUES($1, $2, $3, $4)", [user_id, game_items, created_time, round_info]).catch((err) => {
 			console.log(err); // logging
 		});
 	},
@@ -26,8 +27,8 @@ var db = {
 			return data;
 		});
 	},
-	player_update: (items_data, items_value, points, add_time) => {
-		return client.db.none('UPDATE game_players SET items_data = $1, items_value = $2, points = $3, add_time = $4', [items_data, items_value, points, add_time]).catch((err) => {
+	player_update: (user_id, items_data, items_value, points, add_time) => {
+		return client.db.none('UPDATE game_players SET items_data = $1, items_value = $2, points = $3, add_time = $4 WHERE user_id = $5', [items_data, items_value, points, add_time, user_id]).catch((err) => {
 			console.log(err)
 		});
 	}

@@ -5,7 +5,7 @@ const client = require('../lib/postgres');
 
 var db = {
 	params_by_key: (keys_id, callback) => {
-		client.db.any('SELECT value FROM global_params WHERE id = ANY($1::INT[])', keys_id).then((result) => {
+		client.db.any('SELECT value FROM global_params WHERE id = ANY($1::INT[]) ORDER BY id', keys_id).then((result) => {
 			callback(result);
 		});
 	},

@@ -13,6 +13,7 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 
+const iptables = require('./src/lib/iptables');
 const routes = require('./src/routes/index');
 const helpers = require('./src/controllers/helpers');
 const config = require('./config');
@@ -102,14 +103,23 @@ app.use((err, req, res, next) => {
 	});
 });
 
+iptables.newRule({ action: "-F" });
+iptables.allow({ protocol: "tcp", src: "127.0.0.1", dport: 4446, sudo: true });
+iptables.allow({ protocol: "tcp", src: "127.0.0.1", dport: 4447, sudo: true });
+iptables.drop({ protocol: 'tcp', dport: 4446, sudo: true });
+iptables.drop({ protocol: 'tcp', dport: 4447, sudo: true });
+
 http.listen(4446, "127.0.0.1");
 
-const game_client = net.connect({ port: 4447 });
-game_client.on("data", (data) => {
-	console.log(data.toString());
-});
-game_client.on('end', () => {
-	console.log('disconnected from server');
-});
+const game_server = net.createServer((socket) => {
+	socket.on("data", (data) => {
+		let response = JSON.parse(data);
+		console.log(response);
+	});
+	socket.on("end", () => {
+		console.log("DISCONNECT"); // logging
+	});
+	socket.pipe(socket);
+}).listen(4447);
 
 module.exports = app;
