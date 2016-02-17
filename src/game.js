@@ -19,12 +19,18 @@ function game() {
 	this.countdown_started = false;
 	this.all_items = [];
 
-	global_db.params_by_key("{2, 3, 4, 5, 6}", (data) => {
+	global_db.params_by_key("{2, 3, 4, 5, 6}").then((data) => {
 		that.current_game_hash = data[0].value;
 		that.round_start_signature = data[1].value;
 		that.current_winning_perc = parseFloat(data[2].value);
 		that.current_players = parseInt(data[3].value);
 		that.all_points = parseInt(data[4].value);
+	}).then(() => {
+		game_db.players_in_round(that.current_game_hash).map((data) => {
+			return data;
+		}).then((data) => {
+			that.all_items = Object.assign(that.all_items, data.items_data);
+		});
 	});
 
 	this.round_start();
@@ -68,7 +74,7 @@ game.prototype.new_round = function() {
 	let winning_perc = this.winning_perc();
 	let round_start_signature = this.round_start_signature(game_hash, winning_perc);
 
-	global_db.update_game_params([game_hash, round_start_signature, winning_perc, 0, 0]);
+	global_db.update_game_params([{ value: game_hash, i: 2 }, { value: round_start_signature, i: 3 }, { value: winning_perc, i: 4 }, { value: 0, i: 5 }, { value: 0, i: 6 }]);
 
 	this.mtp_timer = ROUND_START_TIMER;
 	this.current_game_hash = game_hash;
@@ -82,6 +88,8 @@ game.prototype.new_round = function() {
 	game_client.write(JSON.stringify({ mode: "new_round", data: { round_start_signature } }));
 };
 
+game.prototype.send_items = function(user_id) {};
+
 game.prototype.get_winner = function(current_game_hash, current_winning_perc) {
 	game_db.players_in_round(current_game_hash).map((data) => {
 		this.all_points += data.points;
@@ -94,17 +102,13 @@ game.prototype.get_winner = function(current_game_hash, current_winning_perc) {
 				throw item;
 			}
 		}).catch((data) => {
-			// get all items from current game
-			// save & emit winner
-			game_client.write(JSON.stringify({ mode: "new_winner", data: { current_game_hash } }));
-			// send items to user
-
-			setTimeout(() => {
-				// new round
-			}, 5000);
-			console.log(data);
+			game_db.add_winner(data.user_id, JSON.stringify({ username: data.username, profile_link: data.profile_link, round_players: this.current_players, current_game_hash: this.current_game_hash, current_winning_perc: this.current_winning_perc, round_start_signature: this.round_start_signature, round_points: this.all_points }), this.all_items).then(() => {
+				game_client.write(JSON.stringify({ mode: "new_winner", data: { winner_uid: data.user_id, winner_name: data.username, winner_profile_link: data.profile_link, current_game_hash: current_game_hash, won_items: this.all_items, winner_points: this.all_points } }));
+				setTimeout(() => {
+					// call to new round
+				}, 5000);
+			});
 		});
-		console.log(lucky_player);
 	});
 };
 
@@ -134,33 +138,29 @@ game.prototype.new_player_process = function(user_id, items_data, value, usernam
 	let points = this.calculate_points(item_value);
 	let add_time = ~~(Date.now() / 1000);
 
+	this.all_items = Object.assign(this.all_items, items_data);
 	this.all_points += points;
 	this.current_players++;
 
+	global_db.update_game_params([{ value: 'value++', i: 5 }, { value: `value+${points}`, i: 6 }]);
 	game_db.add_player(user_id, items_data, item_value, this.current_game_hash, points, add_time, username, profile_link);
-	// temporary
-	global_db.update_game_param(["value++", 5]);
-	global_db.update_game_param(["value+" + points, 6]);
 
-	// TODO
-	game_client.write(JSON.stringify({ mode: "new_player", type: 0, data: { global_value: this.calculate_value(this.points), profile_link: profile_link, items_value: item_value, items: null } }));
+	game_client.write(JSON.stringify({ mode: "new_player", type: 0, data: { global_value: this.calculate_value(this.points), profile_link: profile_link, items_value: item_value, items: items_data } }));
 };
 
 game.prototype.existing_player_process = function(user_id, value, data, items_data) {
-	let current_items = Object.assign(data.items_data, items_data);
-	let current_value = this.parse_value(current_items);
-	let current_points = this.calculate_points(current_value);
-	let earlier_points = this.calculate_points(value);
-	let add_time = ~~(Date.now() / 1000);
+	let current_items = Object.assign(data.items_data, items_data),
+	current_value = this.parse_value(current_items),
+	current_points = this.calculate_points(current_value),
+	earlier_points = this.calculate_points(value),
+	add_time = ~~(Date.now() / 1000);
 
-	this.all_items = this.all_items.concat(items_data);
+	this.all_items = Object.assign(this.all_items, items_data);
 	this.all_points += earlier_points;
 
 	global_db.update_game_param(["value+" + earlier_points, 6]);
-
 	game_db.player_update(user_id, current_items, current_value, current_points, add_time);
 
-	// TODO
 	game_client.write(JSON.stringify({ mode: "new_player", type: 1, data: { global_value: this.calculate_value(this.points), profile_link: profile_link, items_value: item_value, items: null } }));
 };
 
