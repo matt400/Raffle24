@@ -1,2 +1,1 @@
-# Co nowego #
-...
+# Cancelled Project, 2016-02-17 #
